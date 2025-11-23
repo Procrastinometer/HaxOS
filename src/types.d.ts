@@ -26,6 +26,8 @@ export type RoomObject = {
   setPlayerAdmin(playerId: number, admin: boolean): void;
   startGame(): void;
   stopGame(): void;
+  setDefaultStadium(stadiumName: string): void;
+  setCustomStadium(stadiumFileContents: string): void;
 
   onPlayerJoin?: (player: PlayerObject) => void;
   onPlayerLeave?: (player: PlayerObject) => void;
