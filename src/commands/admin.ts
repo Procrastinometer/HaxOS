@@ -10,7 +10,7 @@ export const handleAdminLogin = async (player: PlayerObject, room: RoomObject, a
   const storedHash = process.env.HAXBALL_ADMIN_PASSWORD;
 
   if (!storedHash) {
-    console.error('ERROR: ADMIN_PASSWORD_HASH is not set in .env!');
+    console.error('ERROR: HAXBALL_ADMIN_PASSWORD is not set in .env!');
 
     sendMessage(room, 'System Error: Auth service unavailable.', player.id, COLORS.ERROR, FontStyle.BOLD);
     return;
