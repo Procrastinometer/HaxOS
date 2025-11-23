@@ -17,7 +17,13 @@ export const handleAdminLogin = async (player: PlayerObject, room: RoomObject, a
   }
 
   if (!inputPassword) {
-    room.sendChat('Usage: !admin <password>', player.id);
+    sendMessage(
+      room,
+      'Usage: !admin <password>',
+      player.id,
+      COLORS.INFO,
+      FontStyle.ITALIC,
+    );
     return;
   }
 
