@@ -1,6 +1,9 @@
 import * as argon2 from 'argon2';
-import { RoomObject, PlayerObject } from '../types';
 import { CommandHandler } from './types';
+import { sendMessage } from '../utils/send-message';
+import { COLORS } from '../utils/colors';
+import { FontStyle } from '../utils/font.types';
+import { PlayerObject, RoomObject } from '../haxball-abstractions/types';
 
 export const handleAdminLogin = async (player: PlayerObject, room: RoomObject, args: string[]): Promise<void> => {
   const inputPassword = args[1];
@@ -9,7 +12,7 @@ export const handleAdminLogin = async (player: PlayerObject, room: RoomObject, a
   if (!storedHash) {
     console.error('ERROR: ADMIN_PASSWORD_HASH is not set in .env!');
 
-    room.sendChat('System Error: Auth service unavailable.', player.id);
+    sendMessage(room, 'System Error: Auth service unavailable.', player.id, COLORS.ERROR, FontStyle.BOLD);
     return;
   }
 
@@ -23,22 +26,22 @@ export const handleAdminLogin = async (player: PlayerObject, room: RoomObject, a
 
     if (isValid) {
       room.setPlayerAdmin(player.id, true);
-      room.sendChat('✅ Administrator access granted.', player.id);
+      sendMessage(room, 'Administrator access granted.', player.id, COLORS.SUCCESS, FontStyle.BOLD);
       console.log(`[AUTH] ${player.name} (ID: ${player.id}) logged in as Admin via Argon2.`);
     } else {
-      room.sendChat('❌ Access denied.', player.id);
+      sendMessage(room, 'Access denied.', player.id, COLORS.ERROR);
       console.log(`[AUTH] ${player.name} (ID: ${player.id}) failed login attempt.`);
     }
   } catch (err) {
     console.error('Argon2 Verification Error:', err);
-    room.sendChat('❌ Internal Security Error', player.id);
+    sendMessage(room, 'Internal Security Error', player.id, COLORS.ERROR);
   }
 };
 
 export const adminGuard = (handler: CommandHandler): CommandHandler => (player, room, args) => {
   console.log(!player.admin)
   if (!player.admin) {
-    room.sendChat('Permission denied. Admin only.', player.id);
+    sendMessage(room, 'Permission denied. Admin only.', player.id, COLORS.ERROR, FontStyle.BOLD);
 
     return;
   }

@@ -1,28 +1,31 @@
-import { RoomObject, PlayerObject } from '../types';
 import { adminGuard, handleAdminLogin } from './admin';
 import { ChatCommands } from './commands.consts';
 import { CommandHandler } from './types';
+import { sendMessage } from '../utils/send-message';
+import { COLORS } from '../utils/colors';
+import { FontStyle } from '../utils/font.types';
+import { PlayerObject, RoomObject } from '../haxball-abstractions/types';
 
 const commands = new Map<string, CommandHandler>([
   [ChatCommands.ADMIN, handleAdminLogin],
 
   [ChatCommands.HELP, (player, room) => {
     const commandList = Object.values(ChatCommands).join(', ');
-    room.sendChat(`Available commands: ${commandList}`, player.id);
+    sendMessage(room, `Available commands: ${commandList}`, player.id, COLORS.INFO, FontStyle.BOLD);
   }],
 
-  [ChatCommands.START, adminGuard((player, room) => {
+  [ChatCommands.START, adminGuard((_, room) => {
     room.startGame();
-    room.sendChat('️Game force started by admin.', player.id);
+    sendMessage(room, 'Game force started by admin.', null, COLORS.SUCCESS, FontStyle.BOLD);
   })],
 
-  [ChatCommands.STOP, adminGuard((player, room) => {
+  [ChatCommands.STOP, adminGuard((_, room) => {
     room.stopGame();
-    room.sendChat('Game stopped by admin.', player.id);
+    sendMessage(room, 'Game stopped by admin.', null, COLORS.ERROR, FontStyle.BOLD);
   })],
 
   [ChatCommands.STATS, (player, room) => {
-    room.sendChat('Stats system is under construction 🏗️', player.id);
+    sendMessage(room, 'Stats system is under construction️', player.id, COLORS.INFO, FontStyle.ITALIC);
   }],
 ]);
 
@@ -37,6 +40,6 @@ export const handleCommand = (player: PlayerObject, message: string, room: RoomO
       console.error(`Error executing ${commandName}:`, err);
     });
   } else {
-    room.sendChat(`Unknown command: ${commandName}. Try ${ChatCommands.HELP}`, player.id);
+    sendMessage(room, `Unknown command: ${commandName}. Try ${ChatCommands.HELP}`, player.id, COLORS.ERROR);
   }
 };

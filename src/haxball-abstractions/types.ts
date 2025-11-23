@@ -1,3 +1,5 @@
+import { FontStyle } from '../utils/font.types';
+
 export type TeamID = 0 | 1 | 2;
 
 export type PlayerObject = {
@@ -22,6 +24,13 @@ export type RoomConfig = {
 };
 
 export type RoomObject = {
+  sendAnnouncement(
+    msg: string,
+    targetId?: number | null,
+    color?: number,
+    style?: FontStyle,
+    sound?: 0 | 1 | 2,
+  ): void;
   sendChat(message: string, playerId?: number): void;
   setPlayerAdmin(playerId: number, admin: boolean): void;
   startGame(): void;
@@ -38,10 +47,3 @@ export type RoomObject = {
 };
 
 export type HBInitFunction = (config: RoomConfig) => RoomObject;
-
-declare module 'haxball.js' {
-  function HBInit(config: RoomConfig): RoomObject;
-
-  const HaxballJS: Promise<typeof HBInit>;
-  export = HaxballJS;
-}
