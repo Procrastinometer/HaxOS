@@ -1,5 +1,6 @@
 import * as argon2 from 'argon2';
 import { RoomObject, PlayerObject } from '../types';
+import { CommandHandler } from './types';
 
 export const handleAdminLogin = async (player: PlayerObject, room: RoomObject, args: string[]): Promise<void> => {
   const inputPassword = args[1];
@@ -32,4 +33,15 @@ export const handleAdminLogin = async (player: PlayerObject, room: RoomObject, a
     console.error('Argon2 Verification Error:', err);
     room.sendChat('❌ Internal Security Error', player.id);
   }
+};
+
+export const adminGuard = (handler: CommandHandler): CommandHandler => (player, room, args) => {
+  console.log(!player.admin)
+  if (!player.admin) {
+    room.sendChat('Permission denied. Admin only.', player.id);
+
+    return;
+  }
+
+  return handler(player, room, args);
 };

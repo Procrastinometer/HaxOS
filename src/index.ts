@@ -1,6 +1,6 @@
 const HaxballJS = require('haxball.js');
-const fs = require('fs');
-const path = require('path');
+import fs from 'node:fs';
+import path from 'node:path';
 
 import { RoomObject, PlayerObject, HBInitFunction } from './types';
 import { HAXOS_CONFIG } from './room.config';
@@ -49,13 +49,14 @@ HaxballJS().then((HBInit: HBInitFunction) => {
 
     if (message.startsWith('!')) {
       handleCommand(player, message, room);
+
       return false;
     }
     return true;
   };
 
   room.onGameStart = (byPlayer: PlayerObject | null) => {
-    const starterName = byPlayer ? byPlayer.name : "System (HaxOS)";
+    const starterName = byPlayer ? byPlayer.name : 'System (HaxOS)';
 
     console.log(`Match started by ${starterName}`);
     room.sendChat('The match has begun! Play fair.');

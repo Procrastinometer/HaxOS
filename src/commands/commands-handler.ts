@@ -1,8 +1,7 @@
 import { RoomObject, PlayerObject } from '../types';
-import { handleAdminLogin } from './admin';
+import { adminGuard, handleAdminLogin } from './admin';
 import { ChatCommands } from './commands.consts';
-
-type CommandHandler = (player: PlayerObject, room: RoomObject, args: string[]) => Promise<void> | void;
+import { CommandHandler } from './types';
 
 const commands = new Map<string, CommandHandler>([
   [ChatCommands.ADMIN, handleAdminLogin],
@@ -12,15 +11,15 @@ const commands = new Map<string, CommandHandler>([
     room.sendChat(`Available commands: ${commandList}`, player.id);
   }],
 
-  [ChatCommands.START, (player, room) => {
+  [ChatCommands.START, adminGuard((player, room) => {
     room.startGame();
-    room.sendChat('Game forced start.', player.id);
-  }],
+    room.sendChat('️Game force started by admin.', player.id);
+  })],
 
-  [ChatCommands.STOP, (player, room) => {
+  [ChatCommands.STOP, adminGuard((player, room) => {
     room.stopGame();
-    room.sendChat('Game stopped.', player.id);
-  }],
+    room.sendChat('Game stopped by admin.', player.id);
+  })],
 
   [ChatCommands.STATS, (player, room) => {
     room.sendChat('Stats system is under construction 🏗️', player.id);
