@@ -12,6 +12,22 @@ export type PlayerObject = {
   conn: string;
 };
 
+export type DiscPropertiesObject = {
+  x: number;
+  y: number;
+  xspeed: number;
+  yspeed: number;
+  xgravity: number;
+  ygravity: number;
+  radius: number;
+  bCoef: number;
+  invMass: number;
+  damping: number;
+  color: number;
+  cMask: number;
+  cGroup: number;
+};
+
 export type RoomConfig = {
   roomName: string;
   playerName?: string;
@@ -31,12 +47,20 @@ export type RoomObject = {
     style?: FontStyle,
     sound?: 0 | 1 | 2,
   ): void;
+
   sendChat(message: string, playerId?: number): void;
   setPlayerAdmin(playerId: number, admin: boolean): void;
   startGame(): void;
   stopGame(): void;
   setDefaultStadium(stadiumName: string): void;
   setCustomStadium(stadiumFileContents: string): void;
+
+  getPlayerList(): PlayerObject[];
+  getPlayerDiscProperties(playerId: number): DiscPropertiesObject;
+  setPlayerDiscProperties(playerId: number, properties: Partial<DiscPropertiesObject>): void;
+  setPlayerAvatar(playerId: number, avatar: string | null): void;
+
+  onGameTick?: () => void;
 
   onPlayerJoin?: (player: PlayerObject) => void;
   onPlayerLeave?: (player: PlayerObject) => void;

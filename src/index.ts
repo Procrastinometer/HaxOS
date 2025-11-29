@@ -7,6 +7,8 @@ import { handleCommand } from './commands/commands-handler';
 import { COLORS } from './utils/colors';
 import { FontStyle } from './utils/font.types';
 import { RoomObject, PlayerObject, HBInitFunction } from './haxball-abstractions/types';
+import { handlePhysicsLogic } from './physics/engine';
+import { clearPhysicsState } from './physics/state';
 
 const CUSTOM_STADIUM_FILE = 'uamap.hbs';
 const CUSTOM_STADIUM_PATH = path.join(__dirname, '..', 'maps', CUSTOM_STADIUM_FILE);
@@ -44,6 +46,7 @@ HaxballJS().then((HBInit: HBInitFunction) => {
 
   room.onPlayerLeave = (player: PlayerObject) => {
     console.log(`[-] ${player.name} (ID: ${player.id}) disconnected.`);
+    clearPhysicsState(player.id);
   };
 
   room.onPlayerChat = (player: PlayerObject, message: string) => {
@@ -55,6 +58,10 @@ HaxballJS().then((HBInit: HBInitFunction) => {
       return false;
     }
     return true;
+  };
+
+  room.onGameTick = () => {
+    handlePhysicsLogic(room);
   };
 
   room.onGameStart = (byPlayer: PlayerObject | null) => {
