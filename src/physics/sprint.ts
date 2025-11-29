@@ -8,7 +8,13 @@ import { PlayerPhysicsState } from './types';
 const playerStates = new Map<number, PlayerPhysicsState>();
 
 export const initPhysicsState = (id: number) => {
-  playerStates.set(id, {activation: 0, cooldownUntil: 0, isSprinting: false});
+  playerStates.set(id, {
+    activation: 0,
+    cooldownUntil: 0,
+    isSprinting: false,
+    sprintUntil: 0,
+    fatigueUntil: 0,
+  });
 };
 
 export const clearPhysicsState = (id: number) => {
@@ -17,6 +23,7 @@ export const clearPhysicsState = (id: number) => {
 
 export const handleSprintLogic = (room: RoomObject) => {
   const players = room.getPlayerList();
+  const now = Date.now();
 
   players.forEach((p) => {
     if (p.team === 0) return;
@@ -30,6 +37,44 @@ export const handleSprintLogic = (room: RoomObject) => {
     const props = room.getPlayerDiscProperties(p.id);
     if (!props) return;
 
+    if (state.sprintUntil > now) {
+      const magnitude = Math.sqrt(props.xspeed ** 2 + props.yspeed ** 2);
+      if (magnitude > 0) {
+        const vecX = props.xspeed / magnitude;
+        const vecY = props.yspeed / magnitude;
+
+        room.setPlayerDiscProperties(p.id, {
+          xgravity: vecX * PHYSICS_CONFIG.SPRINT_FORCE,
+          ygravity: vecY * PHYSICS_CONFIG.SPRINT_FORCE,
+          damping: PHYSICS_CONFIG.NORMAL_DAMPING
+        });
+      }
+      room.setPlayerAvatar(p.id, '⚡');
+      return;
+    }
+
+    if (state.fatigueUntil > now) {
+      room.setPlayerDiscProperties(p.id, {
+        xgravity: -props.xspeed * PHYSICS_CONFIG.FATIGUE_RESISTANCE,
+        ygravity: -props.yspeed * PHYSICS_CONFIG.FATIGUE_RESISTANCE,
+        damping: PHYSICS_CONFIG.NORMAL_DAMPING
+      });
+      room.setPlayerAvatar(p.id, '🥵');
+      return;
+    }
+
+    if (state.fatigueUntil !== 0 && state.fatigueUntil < now) {
+      room.setPlayerDiscProperties(p.id, {
+        xgravity: 0,
+        ygravity: 0,
+        damping: PHYSICS_CONFIG.NORMAL_DAMPING
+      });
+      room.setPlayerAvatar(p.id, null);
+
+      state.fatigueUntil = 0;
+      state.sprintUntil = 0;
+    }
+
     const isHoldingKick = props.damping === PHYSICS_CONFIG.TRIGGER_DAMPING;
 
     if (isHoldingKick) {
@@ -42,7 +87,6 @@ export const handleSprintLogic = (room: RoomObject) => {
       }
 
     } else {
-
       if (state.activation >= 60 && state.activation < 100) {
         triggerSprint(room, p, state);
       } else if (state.activation > 0) {
@@ -70,20 +114,9 @@ const triggerSprint = (room: RoomObject, p: PlayerObject, state: PlayerPhysicsSt
 
   if (magnitude === 0) return;
 
-  const vecX = props.xspeed / magnitude;
-  const vecY = props.yspeed / magnitude;
+  state.sprintUntil = now + PHYSICS_CONFIG.SPRINT_DURATION;
 
-  room.setPlayerDiscProperties(p.id, {
-    xgravity: vecX * PHYSICS_CONFIG.SPRINT_FORCE,
-    ygravity: vecY * PHYSICS_CONFIG.SPRINT_FORCE,
-  });
-
-  room.setPlayerAvatar(p.id, '⚡');
+  state.fatigueUntil = now + PHYSICS_CONFIG.SPRINT_DURATION + PHYSICS_CONFIG.FATIGUE_DURATION;
 
   state.cooldownUntil = now + PHYSICS_CONFIG.COOLDOWN;
-
-  setTimeout(() => {
-    room.setPlayerDiscProperties(p.id, {xgravity: 0, ygravity: 0});
-    room.setPlayerAvatar(p.id, null);
-  }, PHYSICS_CONFIG.SPRINT_DURATION);
 };
