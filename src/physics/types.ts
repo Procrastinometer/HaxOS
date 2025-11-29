@@ -3,5 +3,6 @@ export type PlayerPhysicsState = {
   cooldownUntil: number;
   isSprinting: boolean;
   sprintUntil: number;
+  slideUntil: number;
   fatigueUntil: number;
 };

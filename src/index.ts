@@ -7,7 +7,8 @@ import { handleCommand } from './commands/commands-handler';
 import { COLORS } from './utils/colors';
 import { FontStyle } from './utils/font.types';
 import { RoomObject, PlayerObject, HBInitFunction } from './haxball-abstractions/types';
-import { handleSprintLogic, clearPhysicsState } from './physics/sprint';
+import { handlePhysicsLogic } from './physics/engine';
+import { clearPhysicsState } from './physics/state';
 
 const CUSTOM_STADIUM_FILE = 'uamap.hbs';
 const CUSTOM_STADIUM_PATH = path.join(__dirname, '..', 'maps', CUSTOM_STADIUM_FILE);
@@ -60,7 +61,7 @@ HaxballJS().then((HBInit: HBInitFunction) => {
   };
 
   room.onGameTick = () => {
-    handleSprintLogic(room);
+    handlePhysicsLogic(room);
   };
 
   room.onGameStart = (byPlayer: PlayerObject | null) => {
