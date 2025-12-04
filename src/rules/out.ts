@@ -48,7 +48,7 @@ const handleBallOut = (room: RoomObject, x: number, y: number, type: 'side' | 'e
     const teamColor = oppositeTeam === 1 ? COLORS.ERROR : COLORS.DM;
 
     if (type === 'side') {
-        const placeY = Math.sign(y) * (FIELD.H - 10);
+        const placeY = Math.sign(y) * (FIELD.H + 5);
         const placeX = x;
         sendMessage(room, `⚽ THROW-IN for ${teamName}`, null, teamColor, 'bold');
         placeBall(room, placeX, placeY);
@@ -67,7 +67,7 @@ const handleBallOut = (room: RoomObject, x: number, y: number, type: 'side' | 'e
             const goalKickTeamName = goalKickTeamID === 1 ? 'RED' : 'BLUE';
             setRestartTeam(goalKickTeamID);
             sendMessage(room, `🥅 GOAL KICK for ${goalKickTeamName}`, null, COLORS.SERVER, 'bold');
-            const goalKickX = side * (FIELD.W - 100);
+            const goalKickX = side * (FIELD.W - 120);
             const goalKickY = Math.sign(y) * 80;
             placeBall(room, goalKickX, goalKickY);
         }
