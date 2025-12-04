@@ -10,8 +10,9 @@ import { RoomObject, PlayerObject, HBInitFunction } from './haxball-abstractions
 import { handlePhysicsLogic } from './physics/engine';
 import { clearPhysicsState } from './physics/state';
 
+import { enforceDistance } from './rules/border';
 import { checkRules } from './rules/out';
-import { matchState, resetMatchState, setLastTouch } from './rules/match-state';
+import { matchState, resetMatchState, setLastTouch, setRestartTeam } from './rules/match-state';
 
 const CUSTOM_STADIUM_FILE = 'uamap.hbs';
 const CUSTOM_STADIUM_PATH = path.join(__dirname, '..', 'maps', CUSTOM_STADIUM_FILE);
@@ -83,11 +84,36 @@ HaxballJS().then((HBInit: HBInitFunction) => {
     };
 
     room.onPlayerBallKick = (player: PlayerObject) => {
+        if (matchState.restartTeam !== null) {
+            if (player.team === matchState.restartTeam) {
+                setRestartTeam(null);
+            } else {
+                return;
+            }
+        }
+
         setLastTouch(player.team, player.name);
     };
 
     room.onGameTick = () => {
         handlePhysicsLogic(room);
         checkRules(room);
-    };
+        enforceDistance(room);
+
+        if (matchState.lockedBallPosition) {
+            const ball = room.getDiscProperties(0);
+
+            const dx = ball.x - matchState.lockedBallPosition.x;
+            const dy = ball.y - matchState.lockedBallPosition.y;
+
+            if (Math.abs(dx) > 0.1 || Math.abs(dy) > 0.1 || ball.xspeed !== 0 || ball.yspeed !== 0) {
+                room.setDiscProperties(0, {
+                    x: matchState.lockedBallPosition.x,
+                    y: matchState.lockedBallPosition.y,
+                    xspeed: 0,
+                    yspeed: 0
+                });
+            }
+        }
+    }
 });

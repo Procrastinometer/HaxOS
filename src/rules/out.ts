@@ -1,5 +1,5 @@
 import { RoomObject, TeamID } from '../haxball-abstractions/types';
-import { matchState } from './match-state';
+import { matchState, setRestartTeam, lockBallAt } from './match-state';
 import { sendMessage } from '../utils/send-message';
 import { COLORS } from '../utils/colors';
 
@@ -30,7 +30,6 @@ export const checkRules = (room: RoomObject) => {
 
 const handleBallOut = (room: RoomObject, x: number, y: number, type: 'side' | 'end') => {
     matchState.isBallOutOfPlay = true;
-
     room.setDiscProperties(0, { xspeed: 0, yspeed: 0 });
 
     const lastTeam = matchState.lastTouchTeam;
@@ -40,31 +39,32 @@ const handleBallOut = (room: RoomObject, x: number, y: number, type: 'side' | 'e
     }
 
     const oppositeTeam: TeamID = lastTeam === 1 ? 2 : 1;
+    setRestartTeam(oppositeTeam);
+
     const teamName = oppositeTeam === 1 ? "RED" : "BLUE";
     const teamColor = oppositeTeam === 1 ? COLORS.ERROR : COLORS.DM;
 
     if (type === 'side') {
         const placeY = Math.sign(y) * (FIELD.H - 10);
         const placeX = x;
-
         sendMessage(room, `⚽ THROW-IN for ${teamName}`, null, teamColor, 'bold');
         placeBall(room, placeX, placeY);
     }
-
     else if (type === 'end') {
         const side = Math.sign(x);
         const isDefenseSide = (side === -1 && lastTeam === 1) || (side === 1 && lastTeam === 2);
 
         if (isDefenseSide) {
             sendMessage(room, `⛳ CORNER KICK for ${teamName}`, null, teamColor, 'bold');
-
             const cornerY = Math.sign(y) * (FIELD.H - 20);
             const cornerX = side * (FIELD.W - 20);
             placeBall(room, cornerX, cornerY);
-
         } else {
-            sendMessage(room, `🥅 GOAL KICK for ${side === -1 ? 'RED' : 'BLUE'}`, null, COLORS.SERVER, 'bold');
+            const goalKickTeamID: TeamID = side === -1 ? 1 : 2;
+            const goalKickTeamName = goalKickTeamID === 1 ? 'RED' : 'BLUE';
+            setRestartTeam(goalKickTeamID);
 
+            sendMessage(room, `🥅 GOAL KICK for ${goalKickTeamName}`, null, COLORS.SERVER, 'bold');
             const goalKickX = side * (FIELD.W - 100);
             const goalKickY = Math.sign(y) * 80;
             placeBall(room, goalKickX, goalKickY);
@@ -80,12 +80,15 @@ const placeBall = (room: RoomObject, x: number, y: number) => {
             xspeed: 0,
             yspeed: 0
         });
+
+        lockBallAt(x, y);
+
         matchState.isBallOutOfPlay = false;
         sendMessage(room, "GO!", null, COLORS.SUCCESS, 'small-bold');
     }, 1000);
 };
-
 const resetBall = (room: RoomObject, x: number, y: number) => {
     room.setDiscProperties(0, { x, y, xspeed: 0, yspeed: 0 });
     matchState.isBallOutOfPlay = false;
+    setRestartTeam(null);
 };
