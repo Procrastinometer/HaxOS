@@ -10,6 +10,9 @@ import { RoomObject, PlayerObject, HBInitFunction } from './haxball-abstractions
 import { handlePhysicsLogic } from './physics/engine';
 import { clearPhysicsState } from './physics/state';
 
+import { checkRules } from './rules/out';
+import { matchState, resetMatchState, setLastTouch } from './rules/match-state';
+
 const CUSTOM_STADIUM_FILE = 'uamap.hbs';
 const CUSTOM_STADIUM_PATH = path.join(__dirname, '..', 'maps', CUSTOM_STADIUM_FILE);
 console.clear();
@@ -66,8 +69,25 @@ HaxballJS().then((HBInit: HBInitFunction) => {
 
   room.onGameStart = (byPlayer: PlayerObject | null) => {
     const starterName = byPlayer ? byPlayer.name : 'System (HaxOS)';
-
     console.log(`Match started by ${starterName}`);
+    resetMatchState();
     sendMessage(room, 'The match has begun! Play fair.', null, COLORS.SERVER, FontStyle.BOLD);
   };
+
+    room.onGameStop = () => {
+        resetMatchState();
+    };
+
+    room.onTeamGoal = () => {
+        resetMatchState();
+    };
+
+    room.onPlayerBallKick = (player: PlayerObject) => {
+        setLastTouch(player.team, player.name);
+    };
+
+    room.onGameTick = () => {
+        handlePhysicsLogic(room);
+        checkRules(room);
+    };
 });
