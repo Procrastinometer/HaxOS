@@ -13,6 +13,7 @@ import { clearPhysicsState } from './physics/state';
 import { enforceDistance } from './rules/border';
 import { checkRules } from './rules/out';
 import { matchState, resetMatchState, setLastTouch, setRestartTeam } from './rules/match-state';
+import { detectRicochet } from './rules/ricochet';
 
 const CUSTOM_STADIUM_FILE = 'uamap.hbs';
 const CUSTOM_STADIUM_PATH = path.join(__dirname, '..', 'maps', CUSTOM_STADIUM_FILE);
@@ -97,6 +98,7 @@ HaxballJS().then((HBInit: HBInitFunction) => {
 
     room.onGameTick = () => {
         handlePhysicsLogic(room);
+        detectRicochet(room);
         checkRules(room);
         enforceDistance(room);
 
