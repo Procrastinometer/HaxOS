@@ -101,7 +101,7 @@ HaxballJS().then((HBInit: HBInitFunction) => {
                     const dist = Math.sqrt(dx * dx + dy * dy);
 
                     if (dist > 0) {
-                        const kickPower = 6;
+                        const kickPower = 11;
 
                         const velX = (dx / dist) * kickPower;
                         const velY = (dy / dist) * kickPower;
