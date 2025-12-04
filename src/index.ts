@@ -87,7 +87,35 @@ HaxballJS().then((HBInit: HBInitFunction) => {
     room.onPlayerBallKick = (player: PlayerObject) => {
         if (matchState.restartTeam !== null) {
             if (player.team === matchState.restartTeam) {
+
+                const mass = matchState.originalInvMass ?? 1;
+
                 setRestartTeam(null);
+                matchState.lockedBallPosition = null;
+
+                const ball = room.getDiscProperties(0);
+
+                if (player.position) {
+                    const dx = ball.x - player.position.x;
+                    const dy = ball.y - player.position.y;
+                    const dist = Math.sqrt(dx * dx + dy * dy);
+
+                    if (dist > 0) {
+                        const kickPower = 6;
+
+                        const velX = (dx / dist) * kickPower;
+                        const velY = (dy / dist) * kickPower;
+
+                        room.setDiscProperties(0, {
+                            invMass: mass,
+                            xspeed: velX,
+                            yspeed: velY
+                        });
+                    } else {
+                        room.setDiscProperties(0, { invMass: mass });
+                    }
+                }
+
             } else {
                 return;
             }
@@ -103,19 +131,12 @@ HaxballJS().then((HBInit: HBInitFunction) => {
         enforceDistance(room);
 
         if (matchState.lockedBallPosition) {
-            const ball = room.getDiscProperties(0);
-
-            const dx = ball.x - matchState.lockedBallPosition.x;
-            const dy = ball.y - matchState.lockedBallPosition.y;
-
-            if (Math.abs(dx) > 0.1 || Math.abs(dy) > 0.1 || ball.xspeed !== 0 || ball.yspeed !== 0) {
-                room.setDiscProperties(0, {
-                    x: matchState.lockedBallPosition.x,
-                    y: matchState.lockedBallPosition.y,
-                    xspeed: 0,
-                    yspeed: 0
-                });
-            }
+            room.setDiscProperties(0, {
+                x: matchState.lockedBallPosition.x,
+                y: matchState.lockedBallPosition.y,
+                xspeed: 0,
+                yspeed: 0
+            });
         }
-    }
+    };
 });

@@ -6,6 +6,7 @@ export interface MatchState {
     isBallOutOfPlay: boolean;
     restartTeam: TeamID | null;
     lockedBallPosition: { x: number, y: number } | null;
+    originalInvMass: number | null;
 }
 
 export const matchState: MatchState = {
@@ -13,7 +14,8 @@ export const matchState: MatchState = {
     lastTouchPlayerName: null,
     isBallOutOfPlay: false,
     restartTeam: null,
-    lockedBallPosition: null
+    lockedBallPosition: null,
+    originalInvMass: null
 };
 
 export const resetMatchState = () => {
@@ -22,6 +24,7 @@ export const resetMatchState = () => {
     matchState.isBallOutOfPlay = false;
     matchState.restartTeam = null;
     matchState.lockedBallPosition = null;
+    matchState.originalInvMass = null;
 };
 
 export const setLastTouch = (team: TeamID, name: string) => {
@@ -31,9 +34,6 @@ export const setLastTouch = (team: TeamID, name: string) => {
 
 export const setRestartTeam = (team: TeamID | null) => {
     matchState.restartTeam = team;
-    if (team === null) {
-        matchState.lockedBallPosition = null;
-    }
 };
 
 export const lockBallAt = (x: number, y: number) => {

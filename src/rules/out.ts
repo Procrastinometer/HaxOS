@@ -11,15 +11,12 @@ const FIELD = {
 
 export const checkRules = (room: RoomObject) => {
     if (matchState.isBallOutOfPlay) return;
-
     const ball = room.getDiscProperties(0);
     if (!ball) return;
-
     if (Math.abs(ball.y) > FIELD.H + ball.radius) {
         handleBallOut(room, ball.x, ball.y, 'side');
         return;
     }
-
     if (Math.abs(ball.x) > FIELD.W + ball.radius) {
         if (Math.abs(ball.y) > FIELD.GOAL_Y) {
             handleBallOut(room, ball.x, ball.y, 'end');
@@ -30,6 +27,12 @@ export const checkRules = (room: RoomObject) => {
 
 const handleBallOut = (room: RoomObject, x: number, y: number, type: 'side' | 'end') => {
     matchState.isBallOutOfPlay = true;
+
+    const currentBall = room.getDiscProperties(0);
+    if (currentBall.invMass !== 0) {
+        matchState.originalInvMass = currentBall.invMass;
+    }
+
     room.setDiscProperties(0, { xspeed: 0, yspeed: 0 });
 
     const lastTeam = matchState.lastTouchTeam;
@@ -63,7 +66,6 @@ const handleBallOut = (room: RoomObject, x: number, y: number, type: 'side' | 'e
             const goalKickTeamID: TeamID = side === -1 ? 1 : 2;
             const goalKickTeamName = goalKickTeamID === 1 ? 'RED' : 'BLUE';
             setRestartTeam(goalKickTeamID);
-
             sendMessage(room, `🥅 GOAL KICK for ${goalKickTeamName}`, null, COLORS.SERVER, 'bold');
             const goalKickX = side * (FIELD.W - 100);
             const goalKickY = Math.sign(y) * 80;
@@ -78,7 +80,8 @@ const placeBall = (room: RoomObject, x: number, y: number) => {
             x: x,
             y: y,
             xspeed: 0,
-            yspeed: 0
+            yspeed: 0,
+            invMass: 0
         });
 
         lockBallAt(x, y);
@@ -87,8 +90,11 @@ const placeBall = (room: RoomObject, x: number, y: number) => {
         sendMessage(room, "GO!", null, COLORS.SUCCESS, 'small-bold');
     }, 1000);
 };
+
 const resetBall = (room: RoomObject, x: number, y: number) => {
-    room.setDiscProperties(0, { x, y, xspeed: 0, yspeed: 0 });
+    const mass = matchState.originalInvMass ?? 1;
+    room.setDiscProperties(0, { x, y, xspeed: 0, yspeed: 0, invMass: mass });
+
     matchState.isBallOutOfPlay = false;
     setRestartTeam(null);
 };
