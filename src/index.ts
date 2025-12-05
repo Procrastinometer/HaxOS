@@ -10,6 +10,9 @@ import { RoomObject, PlayerObject, HBInitFunction } from './haxball-abstractions
 import { handlePhysicsLogic } from './physics/engine';
 import { clearPhysicsState } from './physics/state';
 
+import { initAFKState, clearAFKState } from './afk/state';
+import { watchAFK } from './afk/watcher';
+
 import { enforceDistance } from './rules/border';
 import { checkRules } from './rules/out';
 import { matchState, resetMatchState, setLastTouch, setRestartTeam } from './rules/match-state';
@@ -39,6 +42,9 @@ HaxballJS().then((HBInit: HBInitFunction) => {
   }
 
   room.onPlayerJoin = (player: PlayerObject) => {
+
+      initAFKState(player.id);
+
     console.log(`[+] ${player.name} (ID: ${player.id}) connected.`);
 
     sendMessage(room, `Welcome to Real Soccer 7v7, ${player.name}!`, null);
@@ -52,6 +58,7 @@ HaxballJS().then((HBInit: HBInitFunction) => {
   room.onPlayerLeave = (player: PlayerObject) => {
     console.log(`[-] ${player.name} (ID: ${player.id}) disconnected.`);
     clearPhysicsState(player.id);
+    clearAFKState(player.id);
   };
 
   room.onPlayerChat = (player: PlayerObject, message: string) => {
@@ -63,10 +70,6 @@ HaxballJS().then((HBInit: HBInitFunction) => {
       return false;
     }
     return true;
-  };
-
-  room.onGameTick = () => {
-    handlePhysicsLogic(room);
   };
 
   room.onGameStart = (byPlayer: PlayerObject | null) => {
@@ -126,6 +129,7 @@ HaxballJS().then((HBInit: HBInitFunction) => {
 
     room.onGameTick = () => {
         handlePhysicsLogic(room);
+        watchAFK(room);
         detectRicochet(room);
         checkRules(room);
         enforceDistance(room);
