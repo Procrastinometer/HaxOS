@@ -5,9 +5,12 @@ import { sendMessage } from '../utils/send-message';
 import { COLORS } from '../utils/colors';
 import { FontStyle } from '../utils/font.types';
 import { PlayerObject, RoomObject } from '../haxball-abstractions/types';
+import { handleAFKCommand } from './afk';
 
 const commands = new Map<string, CommandHandler>([
   [ChatCommands.ADMIN, handleAdminLogin],
+
+  [ChatCommands.AFK, handleAFKCommand],
 
   [ChatCommands.HELP, (player, room) => {
     const commandList = Object.values(ChatCommands).join(', ');

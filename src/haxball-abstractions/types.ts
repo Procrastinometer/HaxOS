@@ -10,6 +10,13 @@ export type PlayerObject = {
   position: { x: number, y: number } | null;
   auth: string;
   conn: string;
+  input?: {
+    left: boolean;
+    right: boolean;
+    up: boolean;
+    down: boolean;
+    shoot: boolean;
+  };
 };
 
 export type DiscPropertiesObject = {
@@ -50,6 +57,7 @@ export type RoomObject = {
 
   sendChat(message: string, playerId?: number): void;
   setPlayerAdmin(playerId: number, admin: boolean): void;
+  setPlayerTeam(playerID: number, team: TeamID): void;
   startGame(): void;
   stopGame(): void;
   pauseGame(pause: boolean): void;
