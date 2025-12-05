@@ -10,6 +10,11 @@ import { RoomObject, PlayerObject, HBInitFunction } from './haxball-abstractions
 import { handlePhysicsLogic } from './physics/engine';
 import { clearPhysicsState } from './physics/state';
 
+import { enforceDistance } from './rules/border';
+import { checkRules } from './rules/out';
+import { matchState, resetMatchState, setLastTouch, setRestartTeam } from './rules/match-state';
+import { detectRicochet } from './rules/ricochet';
+
 const CUSTOM_STADIUM_FILE = 'uamap.hbs';
 const CUSTOM_STADIUM_PATH = path.join(__dirname, '..', 'maps', CUSTOM_STADIUM_FILE);
 console.clear();
@@ -66,8 +71,72 @@ HaxballJS().then((HBInit: HBInitFunction) => {
 
   room.onGameStart = (byPlayer: PlayerObject | null) => {
     const starterName = byPlayer ? byPlayer.name : 'System (HaxOS)';
-
     console.log(`Match started by ${starterName}`);
+    resetMatchState();
     sendMessage(room, 'The match has begun! Play fair.', null, COLORS.SERVER, FontStyle.BOLD);
   };
+
+    room.onGameStop = () => {
+        resetMatchState();
+    };
+
+    room.onTeamGoal = () => {
+        resetMatchState();
+    };
+
+    room.onPlayerBallKick = (player: PlayerObject) => {
+        if (matchState.restartTeam !== null) {
+            if (player.team === matchState.restartTeam) {
+
+                const mass = matchState.originalInvMass ?? 1;
+
+                setRestartTeam(null);
+                matchState.lockedBallPosition = null;
+
+                const ball = room.getDiscProperties(0);
+
+                if (player.position) {
+                    const dx = ball.x - player.position.x;
+                    const dy = ball.y - player.position.y;
+                    const dist = Math.sqrt(dx * dx + dy * dy);
+
+                    if (dist > 0) {
+                        const kickPower = 11;
+
+                        const velX = (dx / dist) * kickPower;
+                        const velY = (dy / dist) * kickPower;
+
+                        room.setDiscProperties(0, {
+                            invMass: mass,
+                            xspeed: velX,
+                            yspeed: velY
+                        });
+                    } else {
+                        room.setDiscProperties(0, { invMass: mass });
+                    }
+                }
+
+            } else {
+                return;
+            }
+        }
+
+        setLastTouch(player.team, player.name);
+    };
+
+    room.onGameTick = () => {
+        handlePhysicsLogic(room);
+        detectRicochet(room);
+        checkRules(room);
+        enforceDistance(room);
+
+        if (matchState.lockedBallPosition) {
+            room.setDiscProperties(0, {
+                x: matchState.lockedBallPosition.x,
+                y: matchState.lockedBallPosition.y,
+                xspeed: 0,
+                yspeed: 0
+            });
+        }
+    };
 });

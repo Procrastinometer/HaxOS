@@ -1,6 +1,6 @@
 import { FontStyle } from '../utils/font.types';
 
-export type TeamID = 0 | 1 | 2;
+export type TeamID = 0 | 1 | 2; // 0: Spectator, 1: Red, 2: Blue
 
 export type PlayerObject = {
   id: number;
@@ -52,10 +52,14 @@ export type RoomObject = {
   setPlayerAdmin(playerId: number, admin: boolean): void;
   startGame(): void;
   stopGame(): void;
+  pauseGame(pause: boolean): void;
   setDefaultStadium(stadiumName: string): void;
   setCustomStadium(stadiumFileContents: string): void;
 
   getPlayerList(): PlayerObject[];
+  getPlayer(playerId: number): PlayerObject | null;
+  getDiscProperties(discIndex: number): DiscPropertiesObject;
+  setDiscProperties(discIndex: number, properties: Partial<DiscPropertiesObject>): void;
   getPlayerDiscProperties(playerId: number): DiscPropertiesObject;
   setPlayerDiscProperties(playerId: number, properties: Partial<DiscPropertiesObject>): void;
   setPlayerAvatar(playerId: number, avatar: string | null): void;
@@ -68,6 +72,8 @@ export type RoomObject = {
   onGameStart?: (byPlayer: PlayerObject | null) => void;
   onGameStop?: (byPlayer: PlayerObject | null) => void;
   onRoomLink?: (link: string) => void;
+  onPlayerBallKick?: (player: PlayerObject) => void;
+  onTeamGoal?: (team: TeamID) => void;
 };
 
 export type HBInitFunction = (config: RoomConfig) => RoomObject;
