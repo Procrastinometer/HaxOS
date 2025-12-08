@@ -1,0 +1,10 @@
+services:
+  haxos:
+    container_name: haxos-server
+    build: .
+    restart: always
+    network_mode: host
+    environment:
+      - NODE_ENV=production
+    env_file:
+      - .env
