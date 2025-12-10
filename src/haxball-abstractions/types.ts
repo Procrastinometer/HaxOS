@@ -58,6 +58,8 @@ export type RoomObject = {
   sendChat(message: string, playerId?: number): void;
   setPlayerAdmin(playerId: number, admin: boolean): void;
   setPlayerTeam(playerID: number, team: TeamID): void;
+  kickPlayer(playerID: number, reason: string, ban: boolean): void;
+  getScores(): { red: number; blue: number; time: number; scoreLimit: number; timeLimit: number; } | null;
   startGame(): void;
   stopGame(): void;
   pauseGame(pause: boolean): void;
@@ -79,6 +81,8 @@ export type RoomObject = {
   onPlayerChat?: (player: PlayerObject, message: string) => boolean;
   onGameStart?: (byPlayer: PlayerObject | null) => void;
   onGameStop?: (byPlayer: PlayerObject | null) => void;
+  onTeamVictory?: (scores: { red: number; blue: number; time: number; gameTicks: number; }) => void;
+  onPlayerTeamChange?: (changedPlayer: PlayerObject, byPlayer: PlayerObject | null) => void;
   onRoomLink?: (link: string) => void;
   onPlayerBallKick?: (player: PlayerObject) => void;
   onTeamGoal?: (team: TeamID) => void;

@@ -25,3 +25,12 @@ export const getAFKState = (id: number): AFKState => {
     }
     return state;
 };
+
+export const resetAFKTimer = (id: number) => {
+    const state = afkStates.get(id);
+    if (state) {
+        state.lastMoveTime = Date.now();
+        state.warningSent = false;
+        state.isAfk = false;
+    }
+};
