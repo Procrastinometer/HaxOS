@@ -98,7 +98,7 @@ docker-compose up -d
 
 HaxOS was deployed to DigitalOcean droplet using Docker. You can see the [Dockerfile](Dockerfile)
 and [docker-compose.yml](docker-compose.yaml) files for more details. The link to the deployed room
-is: https://www.haxball.com/play?c=UNXQbRdgI5U
+is: [https://www.haxball.com/play?c=UNXQbRdgI5U](https://www.haxball.com/play?c=Nsnjke0j_-Q)
 
 ## Project Structure
 
